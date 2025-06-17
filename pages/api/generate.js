@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     }
 
     // 构建 prompt
-    const prompt = `请为一只${personality}的${type}宠物起一个名字`;
+    const prompt = `请为一只${personality}的${type}宠物起一个名字，只输出名字和十个字以内的解释`;
 
     // 调用 DeepSeek API
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
