@@ -1,76 +1,112 @@
 # Pet Namer API
 
-一个基于 Next.js 和 DeepSeek AI 的宠物命名 API 服务，可部署在 Vercel 上。
+一个基于 DeepSeek AI 的宠物命名 API 服务，使用 Next.js 构建并部署在 Vercel 上。
 
 ## 功能特性
 
-- 🐾 基于宠物类型和性格生成个性化名字
-- 🤖 使用 DeepSeek AI 模型进行智能命名
-- 🚀 支持 Vercel 一键部署
-- 🔒 完整的错误处理和输入验证
-- 🌐 支持 CORS，适合前端调用
+- 🐾 为不同性格的宠物生成个性化名字
+- 🤖 基于 DeepSeek AI 的智能命名
+- 🚀 快速响应，支持 CORS
+- 📱 简单易用的 REST API
 
-## 快速开始
+## 本地开发
 
-### 1. 克隆项目
+### 环境要求
 
-```bash
-git clone <your-repo-url>
-cd pet-namer-api
-```
+- Node.js 18.0.0 或更高版本
+- npm 或 yarn
 
-### 2. 安装依赖
+### 安装依赖
 
 ```bash
 npm install
 ```
 
-### 3. 配置环境变量
+### 配置环境变量
 
-复制 `env.example` 为 `.env.local` 并填入您的 DeepSeek API 密钥：
-
+1. 复制环境变量模板：
 ```bash
 cp env.example .env.local
 ```
 
-编辑 `.env.local`：
+2. 编辑 `.env.local` 文件，添加你的 DeepSeek API 密钥：
 ```
-DEEPSEEK_API_KEY=your_actual_deepseek_api_key
+DEEPSEEK_API_KEY=your_actual_api_key_here
 ```
 
-### 4. 本地开发
+### 运行开发服务器
 
 ```bash
 npm run dev
 ```
 
-访问 http://localhost:3000 查看 API 文档。
+访问 http://localhost:3000 查看应用。
 
-## 部署到 Vercel
-
-### 1. 推送代码到 GitHub
+### 测试 API
 
 ```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
+node test-api.js
 ```
 
-### 2. 在 Vercel 中部署
+## Vercel 部署
 
-1. 访问 [Vercel](https://vercel.com)
-2. 点击 "New Project"
-3. 导入您的 GitHub 仓库
-4. 在环境变量设置中添加 `DEEPSEEK_API_KEY`
-5. 点击 "Deploy"
+### 1. 环境变量配置
 
-## API 使用说明
+在 Vercel 项目设置中，必须配置以下环境变量：
+
+1. 进入 Vercel 控制台
+2. 选择你的项目
+3. 点击 "Settings" → "Environment Variables"
+4. 添加变量：
+   - **Name**: `DEEPSEEK_API_KEY`
+   - **Value**: 你的 DeepSeek API 密钥
+   - **Environment**: Production, Preview, Development (全选)
+
+### 2. 常见部署问题排查
+
+#### 问题 1: API 返回 500 错误
+**原因**: 环境变量未配置或配置错误
+**解决方案**: 
+- 检查 Vercel 环境变量是否正确设置
+- 确保 API 密钥有效
+- 查看 Vercel 函数日志
+
+#### 问题 2: API 无法访问
+**原因**: 路由配置问题
+**解决方案**:
+- 确保 `pages/api/generate.js` 文件存在
+- 检查 `vercel.json` 配置
+
+#### 问题 3: CORS 错误
+**原因**: 跨域请求被阻止
+**解决方案**:
+- 代码中已包含 CORS 配置
+- 检查 `next.config.js` 中的 headers 配置
+
+### 3. 验证部署
+
+部署完成后，可以通过以下方式验证：
+
+1. 访问你的 Vercel 域名
+2. 使用测试脚本（修改 URL）：
+```bash
+# 修改 test-api.js 中的 API_URL
+const API_URL = 'https://your-domain.vercel.app/api/generate';
+node test-api.js
+```
+
+3. 使用 curl 测试：
+```bash
+curl -X POST https://your-domain.vercel.app/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"type": "猫", "personality": "可爱"}'
+```
+
+## API 文档
 
 ### 端点
 
-```
-POST /api/generate
-```
+`POST /api/generate`
 
 ### 请求格式
 
@@ -83,90 +119,64 @@ POST /api/generate
 
 ### 响应格式
 
-成功响应：
 ```json
 {
-  "name": "生成的宠物名字",
+  "name": "起的名字",
   "status": 200
 }
 ```
 
-错误响应：
-```json
-{
-  "error": "错误信息",
-  "status": 错误代码
-}
-```
+### 示例
 
-### 使用示例
-
-#### cURL
-
+**请求**:
 ```bash
 curl -X POST https://your-domain.vercel.app/api/generate \
   -H "Content-Type: application/json" \
-  -d '{
-    "type": "猫",
-    "personality": "可爱"
-  }'
+  -d '{"type": "猫", "personality": "可爱"}'
 ```
 
-#### JavaScript
-
-```javascript
-const response = await fetch('https://your-domain.vercel.app/api/generate', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    type: '猫',
-    personality: '可爱'
-  })
-});
-
-const data = await response.json();
-console.log(data.name); // 输出生成的宠物名字
+**响应**:
+```json
+{
+  "name": "小咪 - 可爱的小猫咪",
+  "status": 200
+}
 ```
 
-#### Python
+## 故障排除
 
-```python
-import requests
+### 本地运行正常，Vercel 无法访问
 
-response = requests.post(
-    'https://your-domain.vercel.app/api/generate',
-    json={
-        'type': '猫',
-        'personality': '可爱'
-    }
-)
+1. **检查环境变量**：
+   - 登录 Vercel 控制台
+   - 进入项目设置 → Environment Variables
+   - 确保 `DEEPSEEK_API_KEY` 已正确设置
 
-data = response.json()
-print(data['name'])  # 输出生成的宠物名字
-```
+2. **检查部署日志**：
+   - 在 Vercel 控制台查看函数日志
+   - 寻找错误信息
 
-## 错误处理
+3. **测试 API 端点**：
+   - 直接访问 `https://your-domain.vercel.app/api/generate`
+   - 应该返回 405 错误（因为不是 POST 请求）
 
-API 包含完整的错误处理机制：
+4. **检查网络请求**：
+   - 使用浏览器开发者工具
+   - 查看网络请求的详细信息
 
-- **400**: 缺少必需字段
-- **405**: 使用了错误的 HTTP 方法
-- **500**: 服务器内部错误或 API 密钥配置问题
+### 常见错误代码
 
-## 环境变量
-
-| 变量名 | 描述 | 必需 |
-|--------|------|------|
-| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | 是 |
+- **500**: 服务器内部错误，通常是环境变量问题
+- **405**: 方法不允许，正常（因为访问的是 GET 请求）
+- **400**: 请求参数错误
+- **401**: API 密钥无效
 
 ## 技术栈
 
 - **框架**: Next.js 14
 - **部署**: Vercel
 - **AI 服务**: DeepSeek API
-- **语言**: JavaScript (Node.js)
+- **语言**: JavaScript
 
 ## 许可证
 
