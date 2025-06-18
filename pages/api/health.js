@@ -21,17 +21,29 @@ export default function handler(req, res) {
   try {
     // 检查环境变量
     const apiKey = process.env.DEEPSEEK_API_KEY;
+    const nodeEnv = process.env.NODE_ENV || 'development';
     const hasApiKey = !!apiKey;
+    const apiKeyLength = hasApiKey ? apiKey.length : 0;
+    const apiKeyPrefix = hasApiKey ? apiKey.substring(0, 8) + '...' : 'none';
+
+    // 检查API密钥格式
+    const isValidApiKey = hasApiKey && apiKeyLength >= 10;
 
     return res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       environment: {
+        nodeEnv: nodeEnv,
         hasApiKey: hasApiKey,
-        apiKeyLength: hasApiKey ? apiKey.length : 0,
-        nodeEnv: process.env.NODE_ENV || 'development'
+        apiKeyLength: apiKeyLength,
+        apiKeyPrefix: apiKeyPrefix,
+        isValidApiKey: isValidApiKey,
+        isProduction: nodeEnv === 'production'
       },
-      version: '1.0.0'
+      version: '1.0.0',
+      message: hasApiKey 
+        ? (isValidApiKey ? 'API密钥配置正确' : 'API密钥格式可能不正确')
+        : '请在Vercel项目设置中配置DEEPSEEK_API_KEY环境变量'
     });
   } catch (error) {
     console.error('Health check error:', error);

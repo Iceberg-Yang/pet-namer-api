@@ -30,17 +30,42 @@ export default async function handler(req, res) {
       });
     }
 
-    // 验证环境变量
+    // 验证环境变量 - 明确检查Vercel环境变量
     const apiKey = process.env.DEEPSEEK_API_KEY;
+    const nodeEnv = process.env.NODE_ENV || 'development';
+    
+    console.log('Environment check:', {
+      nodeEnv: nodeEnv,
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey ? apiKey.length : 0,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 8) + '...' : 'none'
+    });
+
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY environment variable is not configured');
       return res.status(500).json({
         error: 'DEEPSEEK_API_KEY environment variable is not configured',
+        details: {
+          environment: nodeEnv,
+          message: '请在Vercel项目设置中配置DEEPSEEK_API_KEY环境变量'
+        },
         status: 500
       });
     }
 
-    console.log('API Key found, length:', apiKey.length);
+    // 验证API密钥格式
+    if (apiKey.length < 10) {
+      console.error('API key seems too short:', apiKey.length);
+      return res.status(500).json({
+        error: 'Invalid API key format',
+        details: {
+          message: 'API密钥格式不正确，请检查Vercel环境变量配置'
+        },
+        status: 500
+      });
+    }
+
+    console.log('API Key validation passed');
     console.log('Request parameters:', { type, personality });
 
     // 构建 prompt
